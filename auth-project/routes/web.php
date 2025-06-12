@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
+use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Telegram\Bot\Laravel\Facades\Telegram;
+use Illuminate\Support\Facades\Mail;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,10 +39,30 @@ Route::get('/test-db', function () {
 });
 
 
-Route::get('/test-log', function() {
+Route::get('/test-log', function () {
     Log::info('Тест лога', ['user' => Auth::user()]);
     return 'Проверьте storage/logs/laravel.log';
 });
 
 
 require __DIR__ . '/auth.php';
+
+
+Route::get('test-telegram', function () {
+    Telegram::sendMessage([
+        'chat_id' => env('TELEGRAM_CHANNEL_ID', ''),
+        'parse_mode' => 'html',
+        'text' => 'Произошло тестовое событие'
+    ]);
+    return response()->json([
+        'status' => 'success'
+    ]);
+});
+
+
+Route::get('/test-mail', function() {
+    Mail::raw('Тестовое письмо', function($msg) {
+        $msg->to('konstantin.duganov63@yandex.ru')->subject('Hello!');
+    });
+    return 'Письмо отправлено!';
+});
